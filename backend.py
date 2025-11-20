@@ -2,8 +2,14 @@
 import json
 import re
 import sys
-import psycopg2
-from psycopg2.extras import RealDictCursor
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "psycopg2 is required. Install it with `uv pip install -r requirements.txt` "
+        "or `pip install psycopg2-binary` before running the server."
+    ) from exc
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime, timedelta 
