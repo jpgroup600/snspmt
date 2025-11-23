@@ -1,0 +1,2 @@
+DATABASE_URL = os.environ.get('DATABASE_URL')
+SMMPANEL_API_KEY = os.environ.get('SMMPANEL_API_KEY')

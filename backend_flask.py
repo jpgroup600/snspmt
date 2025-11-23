@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import re
 import sys
@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from dotenv import load_dotenv
 from urllib.parse import urlparse, unquote
+from flasgger import Swagger
 
 # UTF-8 인코딩 강제 설정 (Windows에서 psycopg2 내부 인코딩 문제 해결)
 if sys.platform == 'win32':
@@ -67,6 +68,7 @@ def get_parameter_value(key: str, default: str = "") -> str:
 
 # Flask 앱 초기화
 app = Flask(__name__, static_folder='dist', static_url_path='')
+swagger = Swagger(app)
 CORS(app)
 
 # 정적 파일 서빙 설정
@@ -86,7 +88,18 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
-    """허용된 파일 확장자인지 확인"""
+    """허용된 파일 확장자인지 확인
+    ---
+    tags:
+      - 파일 업로드
+    parameters:
+      - name: filename
+        in: path
+        type: string
+        required: true
+    responses:
+      '200':
+    """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -294,7 +307,22 @@ def admin_get_coupons():
 @app.route('/api/admin/coupons', methods=['POST', 'OPTIONS'])
 @require_admin_auth
 def admin_create_coupon():
-    """쿠폰 생성"""
+    """
+    쿠폰 생성
+    ---
+    tags: [admin]
+    parameters:
+      - name: coupon_code
+        in: body
+        type: string
+        required: true
+      - name: coupon_name
+        in: body
+        type: string
+        required: true
+    summary: Create coupon
+    responses: {201: {description: Created}}
+    """
     # OPTIONS 요청 처리 (CORS preflight)
     if request.method == 'OPTIONS':
         return jsonify({}), 200
